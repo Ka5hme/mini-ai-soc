@@ -1,51 +1,38 @@
-from dense_layer import dense_layer
-from network import network
-
-"""
-Golden reference model for the mini AI SoC project.
-
-Defines a small 8 -> 4 -> 2 neural network and executes inference
-using the integer dense-layer implementation.
-
-Expected final output:
-    [75, 25]
-"""
-
-inputs  = [2, 4, 1, 3, 5, 2, 6, 1]
-weights_layer1 = [
-    [ 3, -1,  2,  4, -2,  1,  2, -3],  # Neuron 0
-    [-2,  3,  1, -1,  2,  4, -2,  1],  # Neuron 1
-    [ 1,  2, -3,  2,  1, -2,  3,  2],  # Neuron 2
-    [ 2, -2,  4,  1, -1,  3,  1, -2]   # Neuron 3
-]
-bias_layer1 = [-30, 5, -10, 8]
-
-weights_layer2 = [
-    [2, -1, 3, 1],
-    [-1, 2, 1, -2]
-]
-
-bias_layer2 = [5, -3]
-
-layers = [
-    {
-        "weights": weights_layer1,
-        "bias": bias_layer1
-    },
-
-    {
-        "weights": weights_layer2,
-        "bias": bias_layer2
-    }
-]
+from loaders import load_matrix, load_vector, load_scales
+from golden_model import run_golden_model
 
 
-# Run network
+weights1 = load_matrix("../artifacts/layer1_weights.txt")
+bias1 = load_vector("../artifacts/layer1_bias.txt")
 
-output = network(inputs, layers)
+weights2 = load_matrix("../artifacts/layer2_weights.txt")
+bias2 = load_vector("../artifacts/layer2_bias.txt")
 
-print("Network output:", output)
+scales = load_scales("../artifacts/scales.txt")
 
 
+sample = [6, 7, 5, 8, 6, 7, 5, 8]
 
 
+results = run_golden_model(
+    sample,
+    weights1,
+    bias1,
+    weights2,
+    bias2,
+    scales
+)
+
+
+print("----- Golden Model Results -----")
+
+print("Input:", sample)
+print("Quantized input:", results["quantized_input"])
+
+print("Layer 1 INT32:", results["layer1_int32"])
+print("Layer 1 INT8:", results["layer1_int8"])
+
+print("Layer 2 INT32:", results["layer2_int32"])
+
+print("Final logits:", results["logits"])
+print("Prediction:", results["prediction"])
